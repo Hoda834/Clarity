@@ -20,12 +20,6 @@ function AppRoot() {
     document.documentElement.style.setProperty("--prompt-weight", t.promptWeight);
   }, [t.direction, t.mode, t.promptWeight]);
 
-  useEffectM(() => {
-    if (state.screen === "entry" && window.ClarityAudio) {
-      window.ClarityAudio.stopAll();
-    }
-  }, [state.screen]);
-
   const tint = state.puzzle && /^(cube|onion|orbits|mirror)/.test(state.screen)
     ? state.puzzle
     : "";
