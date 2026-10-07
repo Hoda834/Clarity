@@ -1,6 +1,29 @@
-/* global React */
+/* global React, ClarityAudio */
 
-function GuidancePanel({ eyebrow, title, intro, instruction, reflection, onContinue, continueLabel = "Continue" }) {
+const { useState: useGuidanceState } = React;
+
+function GuidancePanel({ eyebrow, title, intro, instruction, reflection, soundTheme, onContinue }) {
+  const [soundOn, setSoundOn] = useGuidanceState(
+    Boolean(window.ClarityAudio && window.ClarityAudio.isEnabled())
+  );
+
+  const narration = [intro, instruction, reflection].filter(Boolean).join(" ");
+
+  async function toggleSound() {
+    if (!window.ClarityAudio) return;
+    if (soundOn) {
+      window.ClarityAudio.stopAmbient();
+      setSoundOn(false);
+      return;
+    }
+    await window.ClarityAudio.startAmbient(soundTheme || "fog");
+    setSoundOn(true);
+  }
+
+  function replayVoice() {
+    if (window.ClarityAudio) window.ClarityAudio.speak(narration);
+  }
+
   return (
     <div style={{ width: "100%", maxWidth: 760, margin: "0 auto", textAlign: "center" }}>
       {eyebrow && (
@@ -38,9 +61,23 @@ function GuidancePanel({ eyebrow, title, intro, instruction, reflection, onConti
         </p>
       )}
 
-      <div style={{ marginTop: 24, display: "flex", justifyContent: "center" }}>
+      <div style={{
+        marginTop: 24,
+        display: "flex",
+        justifyContent: "center",
+        gap: 10,
+        flexWrap: "wrap",
+      }}>
+        <button className="cta ghost sm" onClick={toggleSound}>
+          {soundOn ? "Sound off" : "Sound on"}
+        </button>
+
+        <button className="cta ghost sm" onClick={replayVoice}>
+          Hear guide
+        </button>
+
         <button className="cta" onClick={onContinue}>
-          {continueLabel} <span>→</span>
+          Enter <span>→</span>
         </button>
       </div>
     </div>
